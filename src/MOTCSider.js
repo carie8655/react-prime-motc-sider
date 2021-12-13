@@ -93,17 +93,7 @@ const MOTCSider = (props) => {
 
   return (
     <div id="MOTCSider">
-      <div
-        style={{
-          fontSize: 24,
-          fontWeight: 600,
-          color: "#007ad9",
-          textAlign: "center",
-          paddingTop: "12px",
-        }}
-      >
-        {props.title}
-      </div>
+      <div className="sider-title">{props.title}</div>
       <ul className="main-menu">
         {renderMenu(menu, collapse, props.path, onClickMenu)}
       </ul>

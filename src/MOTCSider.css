@@ -4,6 +4,14 @@
   height: 100%;
 }
 
+#MOTCSider .sider-title {
+  font-size: 24px;
+  font-weight: 600;
+  text-align: center;
+  padding-top: 12px;
+  padding-bottom: 6px;
+}
+
 #MOTCSider .main-menu {
   background-color: #fff;
   list-style-type: none;
