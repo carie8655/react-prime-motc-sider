@@ -14,12 +14,12 @@ const renderMenu = (arr, collapse, path, onCollapse, onClickMenu) => {
 
     if (items.length > 0) {
       return (
-        <li
-          key={Math.random() * 100}
-          className={open && "active"}
-          onClick={() => onCollapse(item.key)}
-        >
-          <div className={`main-menu-item ${open && "active"}`}>
+        <li key={Math.random() * 100} className={open && "active"}>
+          <div
+            className={`main-menu-item ${open && "active"}`}
+            style={{ justifyContent: "space-between" }}
+            onClick={() => onCollapse(item.key)}
+          >
             <div>
               <i className="icon-logout"></i>
               <span className="title">{item.label}</span>
@@ -86,7 +86,7 @@ const MOTCSider = (props) => {
   }, [window.location.pathname, props.menu]);
 
   const onCollapse = (key) => {
-    if (_.find(collapse, (c) => c === key)) {
+    if (!_.isUndefined(_.find(collapse, (c) => c === key))) {
       setCollapse(_.filter(collapse, (c) => c !== key));
     } else {
       setCollapse([...collapse, key]);
