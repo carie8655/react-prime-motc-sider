@@ -1,84 +1,128 @@
 import "primeflex/primeflex.css";
-import "primereact/resources/themes/nova/theme.css";
 import "primereact/resources/primereact.min.css";
 import "primeicons/primeicons.css";
-import React, { Component } from "react";
-import _ from "lodash";
+import React, { useState, useEffect } from "react";
 import PropTypes from "prop-types";
-import { PanelMenu } from "primereact/panelmenu";
-import { OverlayPanel } from "primereact/overlaypanel";
-import "src/MOTCSider.css";
+import _ from "lodash";
+import "./MOTCSider.css";
 
-class MOTCSider extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {};
-  }
+const renderMenu = (arr, collapse, path, onClickMenu) => {
+  return _.map(arr, (item) => {
+    const items = _.get(item, "items", []);
+    const open = _.find(collapse, (c) => c === item.key);
 
-  OverlayMenu = React.createRef();
-
-  renderOverlayPanel = () => {
-    const { apps } = this.props;
-    return (
-      <OverlayPanel ref={this.OverlayMenu} showCloseIcon={true}>
-        {_.map(apps, (icon) => (
-          <div className="app-row" key={icon.key}>
-            {_.map(icon.items, (item, i) => {
-              const content = (
-                <div className="app-block" key={icon.key}>
-                  <div
-                    className="app"
-                    style={{
-                      backgroundImage: `url(${item.icon})`,
-                      backgroundColor: item.color,
-                    }}
-                  />
-                  <div className="label">{item.label}</div>
-                </div>
-              );
-
-              if (i % 3 === 0 && i !== 0)
-                return (
-                  <div key={item.key}>
-                    <br />
-                    {content}
-                  </div>
-                );
-              else return <div key={item.key}>content</div>;
-            })}
+    if (items.length > 0) {
+      return (
+        <li
+          key={Math.random() * 100}
+          className={open && "active"}
+          onClick={() => onClickMenu(item.key)}
+        >
+          <div className={`main-menu-item ${open && "active"}`}>
+            <div>
+              <i className="icon-logout"></i>
+              <span className="title">{item.label}</span>
+            </div>
+            <div className="main-menu-icon">
+              {open ? (
+                <i className="pi pi-angle-up" />
+              ) : (
+                <i className="pi pi-angle-down" />
+              )}
+            </div>
           </div>
-        ))}
-      </OverlayPanel>
-    );
+          <ul className={`sub-menu ${open && "active"}`}>
+            {renderMenu(items, collapse, path, onClickMenu)}
+          </ul>
+        </li>
+      );
+    } else {
+      return (
+        <li
+          key={Math.random() * 100}
+          className={open && "active"}
+          onClick={() => onClickMenu(item.key)}
+        >
+          <div
+            style={{ justifyContent: "flex-start" }}
+            className={`main-menu-item ${
+              (open || path === item.key) && "active"
+            }`}
+          >
+            <i className="icon-logout"></i>
+            <span className="title">{item.label}</span>
+            <span className="arrow "></span>
+          </div>
+        </li>
+      );
+    }
+  });
+};
+
+const MOTCSider = (props) => {
+  const [menu, setMenu] = useState([]);
+  const [path, setPath] = useState("");
+  const [collapse, setCollapse] = useState([]);
+
+  useEffect(() => {
+    if (props.menu !== menu || props.path !== path) {
+      const arr = _.chain(props.menu)
+        .filter((m) => _.has(m, "items"))
+        .map((m) => {
+          const temp = _.filter(m.items, (i) => i.key.indexOf(props.path) > -1);
+          return temp.length > 0 ? m.key : undefined;
+        })
+        .filter((m) => !_.isUndefined(m))
+        .value();
+
+      setCollapse(arr);
+      setMenu(props.menu);
+      setPath(props.path);
+    }
+  }, [props.path, props.menu, menu, path, collapse]);
+
+  const onClickMenu = (key) => {
+    if (_.find(collapse, (c) => c === key)) {
+      const callback = () => setCollapse(_.filter(collapse, (c) => c !== key));
+      props.onClickMenu(key, callback);
+    } else {
+      const callback = () => setCollapse([...collapse, key]);
+      props.onClickMenu(key, callback);
+    }
   };
 
-  render() {
-    const { title, width, menu } = this.props;
-    return (
-      <div id="MOTCSider" style={{ width }}>
-        <div id="MOTCSider-title">
-          <span>{title}</span>
-          <span>
-            <i
-              className="pi pi-bars"
-              onClick={(event) => this.OverlayMenu.current.toggle(event)}
-            />
-          </span>
-        </div>
-        <PanelMenu model={menu} />
-        {this.renderOverlayPanel()}
+  return (
+    <div id="MOTCSider">
+      <div
+        style={{
+          fontSize: 24,
+          fontWeight: 600,
+          color: "#007ad9",
+          textAlign: "center",
+          paddingTop: "12px",
+        }}
+      >
+        {props.title}
       </div>
-    );
-  }
-}
+      <ul className="main-menu">
+        {renderMenu(menu, collapse, props.path, onClickMenu)}
+      </ul>
+    </div>
+  );
+};
 
 MOTCSider.propTypes = {
   title: PropTypes.string,
-  width: PropTypes.number,
+  path: PropTypes.string,
   menu: PropTypes.array,
-  apps: PropTypes.array,
+  onClickMenu: PropTypes.func,
 };
 
-MOTCSider.defaultProps = { title: "", width: 250, menu: [], apps: [] };
+MOTCSider.defaultProps = {
+  title: "",
+  path: "",
+  menu: [],
+  onClickMenu: (key, callback) => callback(),
+};
 
 export default MOTCSider;

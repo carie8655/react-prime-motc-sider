@@ -24,7 +24,6 @@ function MOTCSiderDemo(){
                     title="Test"
                     width={250}
                     menu={[]}
-                    apps={[]}
                 />
             </div>
         </React.Fragment>
@@ -41,4 +40,3 @@ export default MOTCSiderDemo;
 | title | 'string' | ''      |
 | width | 'number' | ''      |
 | menu  | 'array'  | []      |
-| apps  | 'array'  | []      |
