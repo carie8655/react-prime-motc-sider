@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import "primeflex/primeflex.css";
 import "primereact/resources/primereact.min.css";
 import "primeicons/primeicons.css";
@@ -6,7 +7,7 @@ import PropTypes from "prop-types";
 import _ from "lodash";
 import "./MOTCSider.css";
 
-const renderMenu = (arr, collapse, path, onClickMenu) => {
+const renderMenu = (arr, collapse, path, onCollapse, onClickMenu) => {
   return _.map(arr, (item) => {
     const items = _.get(item, "items", []);
     const open = _.find(collapse, (c) => c === item.key);
@@ -16,7 +17,7 @@ const renderMenu = (arr, collapse, path, onClickMenu) => {
         <li
           key={Math.random() * 100}
           className={open && "active"}
-          onClick={() => onClickMenu(item.key)}
+          onClick={() => onCollapse(item.key)}
         >
           <div className={`main-menu-item ${open && "active"}`}>
             <div>
@@ -32,7 +33,7 @@ const renderMenu = (arr, collapse, path, onClickMenu) => {
             </div>
           </div>
           <ul className={`sub-menu ${open && "active"}`}>
-            {renderMenu(items, collapse, path, onClickMenu)}
+            {renderMenu(items, collapse, path, onCollapse, onClickMenu)}
           </ul>
         </li>
       );
@@ -41,7 +42,7 @@ const renderMenu = (arr, collapse, path, onClickMenu) => {
         <li
           key={Math.random() * 100}
           className={open && "active"}
-          onClick={() => onClickMenu(item.key)}
+          onClick={() => onClickMenu(item)}
         >
           <div
             style={{ justifyContent: "flex-start" }}
@@ -60,34 +61,35 @@ const renderMenu = (arr, collapse, path, onClickMenu) => {
 };
 
 const MOTCSider = (props) => {
-  const [menu, setMenu] = useState([]);
   const [path, setPath] = useState("");
+  const [simplePath, setSimplePath] = useState("");
   const [collapse, setCollapse] = useState([]);
 
   useEffect(() => {
-    if (props.menu !== menu || props.path !== path) {
+    const pathArr = window.location.pathname.split(props.routePrefix);
+    const tempPath = pathArr.length > 1 ? pathArr[1] : "";
+
+    if (window.location.pathname !== path) {
       const arr = _.chain(props.menu)
         .filter((m) => _.has(m, "items"))
         .map((m) => {
-          const temp = _.filter(m.items, (i) => i.key.indexOf(props.path) > -1);
+          const temp = _.filter(m.items, (i) => i.key.indexOf(tempPath) > -1);
           return temp.length > 0 ? m.key : undefined;
         })
         .filter((m) => !_.isUndefined(m))
         .value();
 
       setCollapse(arr);
-      setMenu(props.menu);
-      setPath(props.path);
+      setPath(window.location.pathname);
+      setSimplePath(tempPath);
     }
-  }, [props.path, props.menu, menu, path, collapse]);
+  }, [window.location.pathname, props.menu]);
 
-  const onClickMenu = (key) => {
+  const onCollapse = (key) => {
     if (_.find(collapse, (c) => c === key)) {
-      const callback = () => setCollapse(_.filter(collapse, (c) => c !== key));
-      props.onClickMenu(key, callback);
+      setCollapse(_.filter(collapse, (c) => c !== key));
     } else {
-      const callback = () => setCollapse([...collapse, key]);
-      props.onClickMenu(key, callback);
+      setCollapse([...collapse, key]);
     }
   };
 
@@ -95,7 +97,13 @@ const MOTCSider = (props) => {
     <div id="MOTCSider">
       <div className="sider-title">{props.title}</div>
       <ul className="main-menu">
-        {renderMenu(menu, collapse, props.path, onClickMenu)}
+        {renderMenu(
+          props.menu,
+          collapse,
+          simplePath,
+          onCollapse,
+          props.onClickMenu
+        )}
       </ul>
     </div>
   );
@@ -103,14 +111,14 @@ const MOTCSider = (props) => {
 
 MOTCSider.propTypes = {
   title: PropTypes.string,
-  path: PropTypes.string,
+  routePrefix: PropTypes.string,
   menu: PropTypes.array,
   onClickMenu: PropTypes.func,
 };
 
 MOTCSider.defaultProps = {
   title: "",
-  path: "",
+  routePrefix: "",
   menu: [],
   onClickMenu: (key, callback) => callback(),
 };
