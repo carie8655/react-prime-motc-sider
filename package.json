@@ -1,7 +1,7 @@
 {
   "name": "react-prime-motc-sider",
-  "version": "0.1.0",
-  "main": "./lib/MOTCSider.js",
+  "version": "0.1.1",
+  "main": "./lib/index.js",
   "repository": {
     "type": "git",
     "url": "https://github.com/carie8655/react-prime-motc-sider"
